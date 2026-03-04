@@ -1,10 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
 const multer = require('multer');
 const { OpenAI } = require('openai');
-const ToastResult = require('./models/ToastResult');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -14,15 +12,6 @@ app.use(express.json());
 
 // Set up Multer for memory storage
 const upload = multer({ storage: multer.memoryStorage() });
-
-// Connect to MongoDB
-if (process.env.MONGODB_URI) {
-    mongoose.connect(process.env.MONGODB_URI)
-        .then(() => console.log('Connected to MongoDB'))
-        .catch(err => console.error('MongoDB connection error:', err));
-} else {
-    console.warn('MONGODB_URI not provided. Skipping DB connection.');
-}
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -115,19 +104,9 @@ Summary: [X] toasts analyzed – most are [dominant category], with [any notable
             }
         }
 
-        // Save to database if connected
-        let savedResult = null;
-        if (mongoose.connection.readyState === 1 && process.env.MONGODB_URI) {
-            savedResult = await ToastResult.create({
-                category,
-                reason,
-            });
-        }
-
         res.json({
             category,
-            reason,
-            savedId: savedResult ? savedResult._id : null
+            reason
         });
     } catch (error) {
         console.error('Error classifying toast:', error);
