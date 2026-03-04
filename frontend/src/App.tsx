@@ -46,7 +46,7 @@ function App() {
     formData.append('image', selectedImage);
 
     try {
-      const response = await fetch('http://localhost:5000/classify-toast', {
+      const response = await fetch('https://toastinspector-1.onrender.com/classify-toast', {
         method: 'POST',
         body: formData,
       });
