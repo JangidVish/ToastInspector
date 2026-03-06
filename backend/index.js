@@ -35,38 +35,37 @@ app.post('/classify-toast', upload.single('image'), async (req, res) => {
                     content: [
                         {
                             type: "text",
-                            text: `You are a professional toast classification system with computer vision expertise.
-Analyze the provided toast image and classify each visible toast into exactly one of the following categories based on visual evidence:
+                            text: `You are a professional toast structural analysis system with computer vision expertise.
+Analyze the provided toast image and inspect each visible toast for physical structural damage only.
 
-Perfectly Roasted – Uniform golden-brown color across the entire surface, no pale patches, no dark spots, slight sheen indicating moisture retention
-Lightly Roasted – Predominantly pale yellow or beige, soft appearance, little to no browning, surface looks similar to untoasted bread
-Heavily Roasted – Deep brown to dark brown across most of the surface, visibly dry and crisp texture, edges noticeably darker than center but no black areas
-Burnt – Black or charred areas covering 20%+ of the surface, visible carbonization, possible smoke residue or ash-like texture
-Broken – Physical structural damage: visible cracks, splits, missing chunks, or crumbled pieces — assess color independently but classify as Broken if structurally compromised
+Classification categories:
+
+Intact – No visible cracks, splits, missing chunks, or crumbling. The toast holds its full original shape.
+Minor Cracks – Small surface-level cracks or hairline fractures present, but the toast remains in one piece with no missing sections.
+Major Cracks – Deep or wide cracks that visibly compromise the structure, though the toast is still mostly whole.
+Broken – Visible splits into separate pieces, missing chunks, or significant crumbling that fragments the toast.
 
 Classification rules:
 
-If multiple categories seem applicable, choose the dominant visual characteristic
-Ignore toppings (butter, jam, etc.) — assess only the bread surface beneath
-Evaluate both sides if visible; classify based on the worse side
-Do not infer from context — base classification solely on visual evidence in the image
+Ignore all color, roast level, toppings, or surface texture — assess ONLY physical structural integrity
 Number each toast left to right, top to bottom as they appear in the image
 If toasts are stacked or overlapping, classify only the fully or mostly visible ones; skip any toast that is less than 30% visible
+If multiple damage levels are present, classify based on the most severe visible damage
 
 Output format (strict):
 
 If the image contains one toast:
-[Category] – [One sentence explaining the key visual evidence.]
-If the image contains multiple toasts:
+[Category] – [One sentence describing the structural evidence observed.]
 
-Toast 1: [Category] – [One sentence explaining the key visual evidence.]
-Toast 2: [Category] – [One sentence explaining the key visual evidence.]
-Toast 3: [Category] – [One sentence explaining the key visual evidence.]
+If the image contains multiple toasts:
+Toast 1: [Category] – [One sentence describing the structural evidence observed.]
+Toast 2: [Category] – [One sentence describing the structural evidence observed.]
+Toast 3: [Category] – [One sentence describing the structural evidence observed.]
 ...
 
 End with a one-line summary if there are 3 or more toasts:
 Summary: [X] toasts analyzed – most are [dominant category], with [any notable exceptions].
-
+Note: Dont comment on toast color, roast level, toppings, or surface texture. Only comment about the structural integrity of the toast i.e toast is broken or crack in it or not.
 `
                         },
                         {
