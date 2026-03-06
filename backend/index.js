@@ -65,7 +65,6 @@ Toast 3: [Category] – [One sentence describing the structural evidence observe
 
 End with a one-line summary if there are 3 or more toasts:
 Summary: [X] toasts analyzed – most are [dominant category], with [any notable exceptions].
-Note: Dont comment on toast color, roast level, toppings, or surface texture. Only comment about the structural integrity of the toast i.e toast is broken or crack in it or not.
 `
                         },
                         {

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { UploadCloud, ShieldCheck, Flame, XCircle, AlertTriangle, Loader2, Info } from 'lucide-react';
+import { UploadCloud, ShieldCheck, Flame, XCircle, AlertTriangle, Loader2, Info, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 interface AnalysisResult {
   category: string;
@@ -12,6 +12,7 @@ function App() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -22,6 +23,7 @@ function App() {
       setPreviewUrl(URL.createObjectURL(file));
       setResult(null);
       setError(null);
+      setFeedback(null);
     }
   };
 
@@ -30,6 +32,7 @@ function App() {
     setPreviewUrl(null);
     setResult(null);
     setError(null);
+    setFeedback(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -41,6 +44,7 @@ function App() {
     setIsAnalyzing(true);
     setResult(null);
     setError(null);
+    setFeedback(null);
 
     const formData = new FormData();
     formData.append('image', selectedImage);
@@ -190,9 +194,41 @@ function App() {
                 <h3 className={`text-2xl font-black mb-2 ${getCategoryConfig(result.category).color}`}>
                   {result.category}
                 </h3>
-                <p className="text-gray-700 leading-relaxed font-medium">
+                <p className="text-gray-700 leading-relaxed font-medium mb-4">
                   "{result.reason}"
                 </p>
+
+                {/* Feedback Section */}
+                <div className="flex items-center gap-3 pt-4 border-t border-gray-100 mt-4">
+                  <span className="text-sm font-medium text-gray-500">Was this accurate?</span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setFeedback('up')}
+                      className={`p-2 rounded-full transition-all duration-300 transform outline-none hover:scale-110 active:scale-95 ${feedback === 'up'
+                        ? 'bg-green-100 text-green-600 scale-110 ring-2 ring-green-500 ring-offset-1'
+                        : 'bg-gray-50 text-gray-400 hover:bg-gray-100 focus:ring-2 focus:ring-gray-300'
+                        }`}
+                      aria-label="Thumbs up"
+                    >
+                      <ThumbsUp className={`w-5 h-5 ${feedback === 'up' ? 'fill-current' : ''}`} />
+                    </button>
+                    <button
+                      onClick={() => setFeedback('down')}
+                      className={`p-2 rounded-full transition-all duration-300 transform outline-none hover:scale-110 active:scale-95 ${feedback === 'down'
+                        ? 'bg-red-100 text-red-600 scale-110 ring-2 ring-red-500 ring-offset-1'
+                        : 'bg-gray-50 text-gray-400 hover:bg-gray-100 focus:ring-2 focus:ring-gray-300'
+                        }`}
+                      aria-label="Thumbs down"
+                    >
+                      <ThumbsDown className={`w-5 h-5 ${feedback === 'down' ? 'fill-current' : ''}`} />
+                    </button>
+                  </div>
+                  {feedback && (
+                    <span className="text-sm font-medium text-amber-600 ml-2 animate-pulse bg-amber-50 px-3 py-1 rounded-full">
+                      Thanks for the feedback!
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           )}
