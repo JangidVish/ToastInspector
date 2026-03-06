@@ -77,20 +77,17 @@ function App() {
 
   const getCategoryConfig = (category: string) => {
     const c = category.toLowerCase();
-    if (c.includes('perfectly')) {
-      return { color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-200', icon: <ShieldCheck className="w-8 h-8 text-amber-500" /> };
+    if (c.includes('intact')) {
+      return { color: 'text-emerald-500', bg: 'bg-emerald-50', border: 'border-emerald-200', icon: <ShieldCheck className="w-8 h-8 text-emerald-500" /> };
     }
-    if (c.includes('lightly')) {
-      return { color: 'text-orange-300', bg: 'bg-orange-50', border: 'border-orange-100', icon: <ShieldCheck className="w-8 h-8 text-orange-300" /> };
+    if (c.includes('minor')) {
+      return { color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-200', icon: <Info className="w-8 h-8 text-amber-500" /> };
     }
-    if (c.includes('heavily')) {
-      return { color: 'text-orange-700', bg: 'bg-orange-100', border: 'border-orange-300', icon: <Flame className="w-8 h-8 text-orange-700" /> };
-    }
-    if (c.includes('burnt')) {
-      return { color: 'text-neutral-800', bg: 'bg-neutral-100', border: 'border-neutral-300', icon: <XCircle className="w-8 h-8 text-neutral-800" /> };
+    if (c.includes('major')) {
+      return { color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200', icon: <AlertTriangle className="w-8 h-8 text-orange-600" /> };
     }
     if (c.includes('broken')) {
-      return { color: 'text-red-500', bg: 'bg-red-50', border: 'border-red-200', icon: <AlertTriangle className="w-8 h-8 text-red-500" /> };
+      return { color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200', icon: <XCircle className="w-8 h-8 text-red-600" /> };
     }
     // Default
     return { color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', icon: <Info className="w-8 h-8 text-amber-600" /> };

@@ -86,13 +86,15 @@ Summary: [X] toasts analyzed – most are [dominant category], with [any notable
         let category = "Unknown";
         let reason = resultText;
 
-        const splitIndex = resultText.indexOf(" - ");
+        let splitIndex = resultText.indexOf(" – ");
+        if (splitIndex === -1) splitIndex = resultText.indexOf(" - ");
+
         if (splitIndex !== -1) {
             category = resultText.substring(0, splitIndex).trim();
             reason = resultText.substring(splitIndex + 3).trim();
         } else {
             // Fallback: try to match known categories at the start
-            const categories = ['Perfectly roasted', 'Lightly roasted', 'Heavily roasted', 'Burnt', 'Broken'];
+            const categories = ['Intact', 'Minor Cracks', 'Major Cracks', 'Broken'];
             for (const cat of categories) {
                 if (resultText.toLowerCase().startsWith(cat.toLowerCase())) {
                     category = cat;
