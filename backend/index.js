@@ -16,6 +16,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
+console.log('OpenAI API Key loaded Successfully');
 
 app.post('/classify-toast', upload.single('image'), async (req, res) => {
     try {
