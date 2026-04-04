@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { UploadCloud, ShieldCheck, Flame, XCircle, AlertTriangle, Loader2, Info, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { UploadCloud, ShieldCheck, XCircle, AlertTriangle, Loader2, Info, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 interface AnalysisResult {
   category: string;
