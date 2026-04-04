@@ -10,80 +10,103 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// Set up Multer for memory storage
+// Multer setup (memory storage)
 const upload = multer({ storage: multer.memoryStorage() });
 
+// OpenAI setup
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
-console.log('OpenAI API Key loaded Successfully');
+
+// 🔍 Check API Key at startup
+(async () => {
+    try {
+        const models = await openai.models.list();
+        console.log('✅ OpenAI Connected Successfully');
+    } catch (err) {
+        console.error('❌ OpenAI Connection Failed:', err.message);
+    }
+})();
+
+console.log('🚀 Server initializing...');
+
+// ================= ROUTE =================
 
 app.post('/classify-toast', upload.single('image'), async (req, res) => {
+    console.log('\n📥 Incoming request: /classify-toast');
+
     try {
+        // 🔍 Check file
         if (!req.file) {
+            console.log('❌ No file uploaded');
             return res.status(400).json({ error: 'No image uploaded' });
         }
+
+        console.log('✅ File received:', req.file.originalname);
+        console.log('📦 File size:', req.file.size, 'bytes');
+        console.log('🧾 MIME type:', req.file.mimetype);
 
         const base64Image = req.file.buffer.toString('base64');
         const mimeType = req.file.mimetype;
 
-        // Call OpenAI Vision API
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
+        // 🧠 OpenAI call
+        console.log('🤖 Sending request to OpenAI...');
+
+        const response = await openai.responses.create({
+            model: "gpt-4.1",
+            input: [
                 {
                     role: "user",
                     content: [
                         {
-                            type: "text",
+                            type: "input_text",
                             text: `You are a professional toast structural analysis system with computer vision expertise.
 Analyze the provided toast image and inspect each visible toast for physical structural damage only.
 
 Classification categories:
+Intact – No visible cracks, splits, missing chunks, or crumbling.
+Minor Cracks – Small surface-level cracks.
+Major Cracks – Deep cracks compromising structure.
+Broken – Split pieces or missing chunks.
 
-Intact – No visible cracks, splits, missing chunks, or crumbling. The toast holds its full original shape.
-Minor Cracks – Small surface-level cracks or hairline fractures present, but the toast remains in one piece with no missing sections.
-Major Cracks – Deep or wide cracks that visibly compromise the structure, though the toast is still mostly whole.
-Broken – Visible splits into separate pieces, missing chunks, or significant crumbling that fragments the toast.
+Rules:
+- Ignore color, texture, toppings
+- Number toasts left to right, top to bottom
+- Skip <30% visible toast
+- Choose most severe damage
 
-Classification rules:
-
-Ignore all color, roast level, toppings, or surface texture — assess ONLY physical structural integrity
-Number each toast left to right, top to bottom as they appear in the image
-If toasts are stacked or overlapping, classify only the fully or mostly visible ones; skip any toast that is less than 30% visible
-If multiple damage levels are present, classify based on the most severe visible damage
-
-Output format (strict):
-
-If the image contains one toast:
-[Category] – [One sentence describing the structural evidence observed.]
-
-If the image contains multiple toasts:
-Toast 1: [Category] – [One sentence describing the structural evidence observed.]
-Toast 2: [Category] – [One sentence describing the structural evidence observed.]
-Toast 3: [Category] – [One sentence describing the structural evidence observed.]
-...
-
-End with a one-line summary if there are 3 or more toasts:
-Summary: [X] toasts analyzed – most are [dominant category], with [any notable exceptions].
-`
+Output format:
+Toast 1: [Category] – [Reason]
+Toast 2: [Category] – [Reason]
+Summary: ...`
                         },
                         {
-                            type: "image_url",
-                            image_url: {
-                                url: `data:${mimeType};base64,${base64Image}`
-                            }
+                            type: "input_image",
+                            image_url: `data:${mimeType};base64,${base64Image}`
                         }
                     ]
                 }
             ],
-            max_tokens: 150,
+            max_output_tokens: 150
         });
 
-        const resultText = response.choices[0].message.content.trim();
+        console.log('✅ OpenAI response received');
 
-        // Parse result text (Assumes format "Category - Reason" or similar)
-        // E.g., "Heavily roasted - edges are dark and crispy, center still golden."
+        // 🔍 Extract safely
+        let resultText = '';
+        try {
+            resultText = response.output[0].content[0].text;
+        } catch (e) {
+            console.error('❌ Failed to parse OpenAI response:', response);
+            return res.status(500).json({
+                error: 'Invalid response format from OpenAI',
+                raw: response
+            });
+        }
+
+        console.log('📝 Raw AI Output:\n', resultText);
+
+        // ================= PARSING =================
         let category = "Unknown";
         let reason = resultText;
 
@@ -93,28 +116,34 @@ Summary: [X] toasts analyzed – most are [dominant category], with [any notable
         if (splitIndex !== -1) {
             category = resultText.substring(0, splitIndex).trim();
             reason = resultText.substring(splitIndex + 3).trim();
-        } else {
-            // Fallback: try to match known categories at the start
-            const categories = ['Intact', 'Minor Cracks', 'Major Cracks', 'Broken'];
-            for (const cat of categories) {
-                if (resultText.toLowerCase().startsWith(cat.toLowerCase())) {
-                    category = cat;
-                    reason = resultText.substring(cat.length).replace(/^[^a-zA-Z0-9]+/, '').trim();
-                    break;
-                }
-            }
         }
 
+        // ================= RESPONSE =================
         res.json({
+            success: true,
             category,
-            reason
+            reason,
+            raw: resultText // 👈 always include for debugging
         });
+
     } catch (error) {
-        console.error('Error classifying toast:', error);
-        res.status(500).json({ error: 'Failed to classify image' });
+        console.error('❌ Error in /classify-toast:');
+
+        if (error.response) {
+            console.error('🔴 OpenAI API Error:', error.response.data);
+        } else {
+            console.error('🔴 General Error:', error.message);
+        }
+
+        res.status(500).json({
+            error: 'Failed to classify image',
+            details: error.message
+        });
     }
 });
 
+// ================= SERVER =================
+
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
